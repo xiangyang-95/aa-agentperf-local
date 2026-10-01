@@ -140,7 +140,7 @@ also carry a note that they are not from Artificial Analysis.
 
 Every catalog candidate is evaluated through the same selection surface. A
 candidate with a complete deployment recipe is intersected with the detected
-CUDA, ROCm, or Apple Metal platform, the accelerator families declared by that
+CUDA, ROCm, Apple Metal, or Intel SYCL platform, the accelerator families declared by that
 recipe, its framework list, installed executables, and its minimum memory. Only
 installed launch candidates appear in the selector. A blocked candidate remains
 visible and shows whether the problem is platform support, memory, or a missing

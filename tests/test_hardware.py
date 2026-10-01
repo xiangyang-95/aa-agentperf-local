@@ -248,11 +248,10 @@ def test_intel_gpus_come_from_the_intel_runtime_in_clinfo(
     assert b"private-host" not in encoded
 
 
-def test_managed_serving_refuses_an_intel_gpu_by_name() -> None:
+def test_managed_serving_classifies_an_intel_gpu() -> None:
     snapshot = collect_hardware_snapshot(_clinfo_probe("clinfo", 0, _clinfo_output(ARC_A770)))
 
-    with pytest.raises(ValueError, match="does not support Intel GPUs"):
-        accelerator_platform(snapshot)
+    assert accelerator_platform(snapshot) == "intel-xpu"
 
 
 @pytest.mark.parametrize("memory_kind", ["APU", "DISCRETE"])

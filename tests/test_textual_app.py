@@ -2020,7 +2020,7 @@ async def test_computer_without_a_supported_accelerator_still_opens(tmp_path: Pa
         # An accelerator the app cannot classify keeps its own error rather than a platform list.
         await _highlight_profile(app, pilot, "gemma4-12b-it-q4-0")
         detail = str(app.query_one("#model-detail", Static).content)
-        assert "does not expose CUDA, ROCm, or Apple Metal" in detail
+        assert "does not expose CUDA, ROCm, Apple Metal, or Intel SYCL" in detail
         assert "It runs on" not in detail
 
 

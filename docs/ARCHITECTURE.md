@@ -29,7 +29,8 @@ The attached-endpoint path:
    metrics.
 5. Commit five private result files, with `summary.json` written last.
 
-The managed path detects CUDA, ROCm, or Apple Metal. It matches the host
+The managed path detects CUDA, ROCm, Apple Metal, or an Intel GPU, which it
+serves through SYCL. It matches the host
 against the recipe's accelerators, frameworks, installed runtimes, and memory
 floor. It then downloads and verifies the pinned files, starts an owned
 localhost server, checks its model alias and GPU startup evidence, writes a
@@ -110,7 +111,7 @@ Custom datasets use the manifest and JSONL trace format in
 [`recipes/`](../recipes) holds one YAML file per recipe. A recipe has one of three shapes:
 
 - A **GGUF recipe** pins one or more files by size and SHA-256. llama.cpp serves
-  it on CUDA, ROCm, or Metal.
+  it on CUDA, ROCm, Metal, or SYCL.
 - A **weights recipe** pins every file of a Hugging Face revision that the
   runtime opens. SGLang or vLLM serves it on CUDA.
 - A **Splash package recipe** pins every file of a packed Splash package: its

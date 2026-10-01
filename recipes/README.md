@@ -15,9 +15,9 @@ recipes/<model_release_slug>/<hardware>/<profile_id>.yaml
   folder. For a release with dated checkpoints, use the slug of the checkpoint
   that matches the recipe's `hf_revision`.
 - `<hardware>` is where the recipe was built for: `any` for portable GGUF
-  recipes that run on CUDA, ROCm, or Metal; `nvidia-cuda` for any NVIDIA GPU
+  recipes that run on CUDA, ROCm, Metal, or SYCL; `nvidia-cuda` for any NVIDIA GPU
   with FP4 support; or a device, such as `rtx-5090`, `dgx-spark`,
-  `strix-halo`, or `m5-pro`.
+  `strix-halo`, `m5-pro`, or `panther-lake` (Intel Arc B390 integrated GPU).
 - The file name is the recipe's `profile_id`. You pass it to `--profile-id`.
 
 A recipe holds only what the run uses: its name, the files to download, the

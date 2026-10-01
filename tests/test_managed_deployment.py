@@ -528,6 +528,8 @@ def test_external_draft_recipe_launches_both_pinned_gguf_files(
         ("qwen35-9b-q4-k-m-mtp-m5-pro", "Apple", "Metal", "MTL0", "mmap", "6", "2", "512"),
         ("qwen36-35b-a3b-q4-k-m-mtp-m5-pro", "Apple", "Metal", "MTL0", "mmap", "6", "2", "512"),
         ("qwen38-27b-q4-k-m-mtp-m5-pro", "Apple", "Metal", "MTL0", "mmap", "6", "4", "512"),
+        ("qwen35-9b-q4-k-m-mtp-panther-lake", "Intel", "OpenCL", "SYCL0", "none", "16", "2", "2048"),
+        ("qwen36-35b-a3b-q4-k-m-mtp-panther-lake", "Intel", "OpenCL", "SYCL0", "none", "16", "2", "512"),
     ),
 )
 def test_screened_recipes_keep_their_measured_launch_settings(
@@ -575,6 +577,8 @@ def test_screened_recipes_keep_their_measured_launch_settings(
     ):
         assert plan.command[plan.command.index(flag) + 1] == expected
     assert "--spec-draft-backend-sampling" in plan.command
+    if device == "SYCL0":
+        assert plan.accelerator_backend == "sycl"
     if device == "Vulkan0":
         with pytest.raises(ValueError, match="unpinned single-accelerator"):
             create_deployment_plan(
@@ -837,6 +841,34 @@ def test_amd_startup_requires_the_requested_backend_and_full_offload(
             verify_gpu_startup(deployment)
         else:
             with pytest.raises(RuntimeError, match="did not report"):
+                verify_gpu_startup(deployment)
+
+
+@pytest.mark.parametrize(
+    ("reported_backend", "offloaded", "error"),
+    (
+        ("sycl", "1/1", None),
+        ("sycl", "0/1", "did not report full intel-xpu offload"),
+        ("vulkan", "1/1", "did not report its intel-xpu backend"),
+        ("sycl-failed", "1/1", "reported a failed intel-xpu backend"),
+    ),
+)
+def test_intel_startup_requires_the_sycl_backend_and_full_offload(
+    tmp_path: Path, reported_backend: str, offloaded: str, error: str | None
+) -> None:
+    base = _owned_plan(tmp_path, offloaded=offloaded)
+    plan = replace_fields(
+        base,
+        accelerator_platform="intel-xpu",
+        accelerator_backend="sycl",
+        command=(*base.command, "--platform", reported_backend),
+    )
+    with start_managed_deployment(plan, tmp_path / "deployment.log") as deployment:
+        wait_for_deployment(deployment, timeout_seconds=MANAGED_TEST_STARTUP_TIMEOUT_SECONDS)
+        if error is None:
+            verify_gpu_startup(deployment)
+        else:
+            with pytest.raises(RuntimeError, match=error):
                 verify_gpu_startup(deployment)
 
 
@@ -1308,6 +1340,7 @@ def test_multi_accelerator_hosts_must_name_a_device() -> None:
     [
         ("NVIDIA", "CUDA", 1, (("CUDA_DEVICE_ORDER", "PCI_BUS_ID"), ("CUDA_VISIBLE_DEVICES", "1"))),
         ("AMD", "ROCm", 0, (("ROCR_VISIBLE_DEVICES", "0"), ("HIP_VISIBLE_DEVICES", "0"))),
+        ("Intel", "OpenCL", 1, (("ONEAPI_DEVICE_SELECTOR", "level_zero:1"),)),
     ],
 )
 def test_binding_selects_and_pins_one_device_by_index(

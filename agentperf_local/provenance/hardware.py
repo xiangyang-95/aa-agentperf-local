@@ -17,6 +17,7 @@ from agentperf_local.common.json_types import JsonObject, JsonValue
 from agentperf_local.common.models import replace_fields
 from agentperf_local.provenance.accelerator_probes import (
     AMD_VENDOR,
+    INTEL_API,
     INTEL_VENDOR,
     MACOS_DEFAULT_VENDOR,
     NVIDIA_VENDOR,
@@ -93,7 +94,7 @@ class HardwareSnapshot(BaseModel, frozen=True):
         }
 
 
-type AcceleratorPlatform = Literal["nvidia-cuda", "amd-rocm", "apple-metal"]
+type AcceleratorPlatform = Literal["nvidia-cuda", "amd-rocm", "apple-metal", "intel-xpu"]
 
 
 # The submission contract's name for each vendor label the probes write.
@@ -146,11 +147,9 @@ def accelerator_platform(snapshot: HardwareSnapshot) -> AcceleratorPlatform:
         return "amd-rocm"
     if accelerator.vendor == "Apple" and accelerator.api == "Metal":
         return "apple-metal"
-    if accelerator.vendor == INTEL_VENDOR:
-        raise ValueError(
-            "managed serving does not support Intel GPUs yet; start your own server and measure it with run"
-        )
-    raise ValueError("detected accelerator does not expose CUDA, ROCm, or Apple Metal")
+    if accelerator.vendor == INTEL_VENDOR and accelerator.api == INTEL_API:
+        return "intel-xpu"
+    raise ValueError("detected accelerator does not expose CUDA, ROCm, Apple Metal, or Intel SYCL")
 
 
 def collect_hardware_snapshot(probe: SystemProbe | None = None) -> HardwareSnapshot:

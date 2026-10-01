@@ -9,6 +9,7 @@ devices:
 - nvidia-cuda
 - amd-rocm
 - apple-silicon
+- intel-xpu
 tool_call_parser: qwen3_coder
 reasoning_parser: qwen3
 thinking_policy: enabled-medium-candidate

@@ -1,0 +1,117 @@
+{
+  "client_backend": "python",
+  "endpoint_model_digest": "sha256:c508ae1bba0cf3018c2a6cb5ace903283fb5fd98b62a1c0719203118bd7d69d0",
+  "kind": "runtime_qualification",
+  "outcomes": [
+    {
+      "arguments_valid": true,
+      "call_identifiers_present": true,
+      "completion_tokens": 113,
+      "content_present": false,
+      "decoded_chunk_count": 91,
+      "failure_codes": [],
+      "finish_reason": "tool_calls",
+      "passed": true,
+      "probe_id": "single_tool",
+      "prompt_tokens": 304,
+      "raw_read_count": 90,
+      "reasoning_present": true,
+      "status_code": null,
+      "tool_call_count": 1,
+      "tool_names": [
+        "lookup_issue"
+      ],
+      "usage_present": true
+    },
+    {
+      "arguments_valid": true,
+      "call_identifiers_present": true,
+      "completion_tokens": 36,
+      "content_present": true,
+      "decoded_chunk_count": 36,
+      "failure_codes": [],
+      "finish_reason": "stop",
+      "passed": true,
+      "probe_id": "no_tool",
+      "prompt_tokens": 296,
+      "raw_read_count": 35,
+      "reasoning_present": true,
+      "status_code": null,
+      "tool_call_count": 0,
+      "tool_names": [],
+      "usage_present": true
+    },
+    {
+      "arguments_valid": false,
+      "call_identifiers_present": true,
+      "completion_tokens": 128,
+      "content_present": false,
+      "decoded_chunk_count": 109,
+      "failure_codes": [
+        "tool_sequence_mismatch",
+        "tool_arguments_mismatch"
+      ],
+      "finish_reason": "tool_calls",
+      "passed": false,
+      "probe_id": "parallel_tools",
+      "prompt_tokens": 382,
+      "raw_read_count": 108,
+      "reasoning_present": true,
+      "status_code": null,
+      "tool_call_count": 1,
+      "tool_names": [
+        "read_file"
+      ],
+      "usage_present": true
+    },
+    {
+      "arguments_valid": true,
+      "call_identifiers_present": true,
+      "completion_tokens": 81,
+      "content_present": false,
+      "decoded_chunk_count": 61,
+      "failure_codes": [],
+      "finish_reason": "tool_calls",
+      "passed": true,
+      "probe_id": "tool_history",
+      "prompt_tokens": 431,
+      "raw_read_count": 60,
+      "reasoning_present": true,
+      "status_code": null,
+      "tool_call_count": 1,
+      "tool_names": [
+        "record_result"
+      ],
+      "usage_present": true
+    },
+    {
+      "arguments_valid": true,
+      "call_identifiers_present": true,
+      "completion_tokens": 1,
+      "content_present": false,
+      "decoded_chunk_count": 4,
+      "failure_codes": [],
+      "finish_reason": "length",
+      "passed": true,
+      "probe_id": "capped_finish",
+      "prompt_tokens": 23,
+      "raw_read_count": 3,
+      "reasoning_present": true,
+      "status_code": null,
+      "tool_call_count": 0,
+      "tool_names": [],
+      "usage_present": true
+    }
+  ],
+  "pack_digest": "sha256:95690cb1f6037c919eaf7780381436e8c0957922333972a67e239b5d0458033e",
+  "passed": true,
+  "privacy": {
+    "endpoint_url_included": false,
+    "generated_text_included": false,
+    "tool_arguments_included": false
+  },
+  "profile_id": "qwen36-35b-a3b-q4-k-m-mtp-intel-xpu",
+  "run_id": "58d8eaf8-ac0a-4ef6-be28-31d9e6f8a686",
+  "synthetic_pack_id": "aa-runtime-synthetic-v1",
+  "version": 2
+}

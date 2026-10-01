@@ -29,6 +29,12 @@ STARTUP_LINES = {
     "cuda": "using device CUDA0 (fixture); CUDA0 model buffer size = 1 MiB; offloaded 1/1 layers to GPU",
     "rocm": "using device ROCm0 (fixture); ROCm0 model buffer size = 1 MiB; offloaded 1/1 layers to GPU",
     "vulkan": "using device Vulkan0 (fixture); Vulkan0 model buffer size = 1 MiB; offloaded 1/1 layers to GPU",
+    "sycl": "using device SYCL0 (fixture); SYCL0 model buffer size = 1 MiB; offloaded 1/1 layers to GPU",
+    # The lines a SYCL build prints when it finds no device.
+    "sycl-failed": (
+        "ggml_sycl_init: no SYCL device available: fixture\nSYCL: failed to initialize: ggml_sycl_init\n"
+        "offloaded 1/1 layers to GPU"
+    ),
 }
 SPLASH_STARTUP_LINE = "20:59:43 Kernel policy for GPU family 10 with 20 cores."
 

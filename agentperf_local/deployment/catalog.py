@@ -43,7 +43,7 @@ RECIPES_README = "README.md"
 # source checkout has no copy, so it reads the folder at the repository root.
 _PACKAGED_RECIPES_ROOT = PACKAGE_DATA_ROOT / "recipes"
 BUNDLED_RECIPES_ROOT = _PACKAGED_RECIPES_ROOT if _PACKAGED_RECIPES_ROOT.is_dir() else PACKAGE_ROOT.parent / "recipes"
-BUNDLED_RECIPES_DIGEST = "sha256:706962403653579a17fabd2f226097013c300fc98f4de10bda94cc16502bb1aa"
+BUNDLED_RECIPES_DIGEST = "sha256:fb5902dd5c31064ca726837c2787230821524574831ada2572a1cdc5d5da37db"
 
 type ToolCallParser = Literal["gemma4", "glm45", "gpt-oss", "qwen3_coder", "qwen3_xml"]
 type ReasoningParser = Literal["gemma4", "gpt-oss", "nemotron_v3", "qwen3"]
@@ -58,15 +58,15 @@ type SpeculationPolicy = Literal[
     "enabled-dspark-draft",
     "enabled-vllm-external-draft",
 ]
-type DeviceId = Literal["nvidia-cuda", "amd-rocm", "apple-silicon"]
+type DeviceId = Literal["nvidia-cuda", "amd-rocm", "apple-silicon", "intel-xpu"]
 type DeploymentFramework = Literal["llama-cpp", "sglang", "vllm", "splash"]
 type ArtifactKind = Literal["gguf-single-file", "gguf-file-set", "safetensors-repository", "splash-package"]
-type LlamaCppBackend = Literal["rocm", "vulkan", "metal"]
+type LlamaCppBackend = Literal["rocm", "vulkan", "metal", "sycl"]
 type LlamaCppLoadMode = Literal["none", "mmap"]
 # How llama.cpp serves tensors it reads on demand. "on-direct" serves the rows of a
 # per-layer-embedding table with explicit reads from disk, so the table is never resident.
 type LlamaCppLazyMode = Literal["on-direct"]
-LLAMA_CPP_BACKENDS: tuple[LlamaCppBackend, ...] = ("rocm", "vulkan", "metal")
+LLAMA_CPP_BACKENDS: tuple[LlamaCppBackend, ...] = ("rocm", "vulkan", "metal", "sycl")
 LLAMA_CPP_LOAD_MODES: tuple[LlamaCppLoadMode, ...] = ("none", "mmap")
 LLAMA_CPP_LAZY_MODES: tuple[LlamaCppLazyMode, ...] = ("on-direct",)
 # Which fused-expert kernel serves a mixture-of-experts recipe. SGLang picks one from
@@ -75,7 +75,7 @@ LLAMA_CPP_LAZY_MODES: tuple[LlamaCppLazyMode, ...] = ("on-direct",)
 type MoeRunnerBackend = Literal["flashinfer_cutlass"]
 
 DEPLOYMENT_FRAMEWORK_ORDER: tuple[DeploymentFramework, ...] = ("llama-cpp", "sglang", "vllm", "splash")
-DEVICE_IDS: tuple[DeviceId, ...] = ("nvidia-cuda", "amd-rocm", "apple-silicon")
+DEVICE_IDS: tuple[DeviceId, ...] = ("nvidia-cuda", "amd-rocm", "apple-silicon", "intel-xpu")
 MOE_RUNNER_BACKENDS: tuple[MoeRunnerBackend, ...] = ("flashinfer_cutlass",)
 REASONING_PARSERS: tuple[ReasoningParser, ...] = ("gemma4", "gpt-oss", "nemotron_v3", "qwen3")
 THINKING_POLICIES: tuple[ThinkingPolicy, ...] = ("disabled", "enabled", "enabled-medium-candidate")
@@ -239,7 +239,7 @@ class LlamaCppLaunch(BaseModel, frozen=True):
         if self.draft_model_filename is not None:
             validate_artifact_path(self.draft_model_filename, "llama_cpp.draft_model_filename")
         if self.backend is not None and self.backend not in LLAMA_CPP_BACKENDS:
-            raise ValueError("llama.cpp backend must be rocm, vulkan, or metal")
+            raise ValueError("llama.cpp backend must be rocm, vulkan, metal, or sycl")
         if self.load_mode is not None and self.load_mode not in LLAMA_CPP_LOAD_MODES:
             raise ValueError("llama.cpp load_mode must be none or mmap")
         if self.lazy_mode is not None and self.lazy_mode not in LLAMA_CPP_LAZY_MODES:
@@ -257,6 +257,8 @@ class LlamaCppLaunch(BaseModel, frozen=True):
             return "Vulkan0"
         if self.backend == "metal":
             return "MTL0"
+        if self.backend == "sycl":
+            return "SYCL0"
         return None
 
 
@@ -520,10 +522,17 @@ class ModelCandidate(BaseModel, frozen=True):
         _revision(self.hf_revision, "hf_revision")
         expected_device_order = tuple(device_id for device_id in DEVICE_IDS if device_id in self.devices)
         if not self.devices or len(set(self.devices)) != len(self.devices) or self.devices != expected_device_order:
-            raise ValueError("devices must be a canonical subset of nvidia-cuda, amd-rocm, and apple-silicon")
+            raise ValueError(
+                "devices must be a canonical subset of nvidia-cuda, amd-rocm, apple-silicon, and intel-xpu"
+            )
         llama_cpp = self.deployment.llama_cpp
         if llama_cpp is not None and llama_cpp.backend is not None:
-            expected_devices = ("apple-silicon",) if llama_cpp.backend == "metal" else ("amd-rocm",)
+            if llama_cpp.backend == "metal":
+                expected_devices = ("apple-silicon",)
+            elif llama_cpp.backend == "sycl":
+                expected_devices = ("intel-xpu",)
+            else:
+                expected_devices = ("amd-rocm",)
             if self.devices != expected_devices:
                 raise ValueError("llama.cpp backend must match the recipe's devices")
         if self.speculation_policy in (

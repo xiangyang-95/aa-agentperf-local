@@ -48,7 +48,7 @@ def test_loads_recipes_as_typed_records_in_path_order() -> None:
     """Expose the exact pilot intent without promoting its trust state."""
     catalog = load_model_catalog(CATALOG_PATH)
 
-    assert catalog.as_of == "2026-09-30"
+    assert catalog.as_of == "2026-10-01"
     # Recipes load in recipes/<model_release_slug>/<hardware>/ order, and "any" sorts first within a model.
     assert [(model.profile_id, model.hf_revision) for model in catalog.models] == [
         ("gemma4-12b-it-q4-0", "29d097773436b69ff9feafd636ab4cf873786537"),
@@ -71,6 +71,7 @@ def test_loads_recipes_as_typed_records_in_path_order() -> None:
         ("qwen35-122b-a10b-nvfp4-mtp-dgx-spark", "98915d837c4e7c87ac8296d02e89de19b3207e6d"),
         ("qwen35-9b-nvfp4-mtp-dgx-spark", "97aef92393f126bf649f310cd40861be8dad3279"),
         ("qwen35-9b-q4-k-m-mtp-m5-pro", "9716a636ee4bddc3fed678220b7a33dd2a4160ae"),
+        ("qwen35-9b-q4-k-m-mtp-panther-lake", "9716a636ee4bddc3fed678220b7a33dd2a4160ae"),
         ("qwen35-9b-q4-k-m-mtp-rtx5090", "9716a636ee4bddc3fed678220b7a33dd2a4160ae"),
         ("qwen35-9b-q4-k-m-mtp-strix-halo", "9716a636ee4bddc3fed678220b7a33dd2a4160ae"),
         ("qwen36-27b-nvfp4-mtp-dgx-spark", "0893e1606ff3d5f97a441f405d5fc541a6bdf404"),
@@ -78,6 +79,7 @@ def test_loads_recipes_as_typed_records_in_path_order() -> None:
         ("qwen36-27b-q4-k-m-mtp-strix-halo", "5cb35eb3dcbf52dbce5f87dbc64df6aaffadcace"),
         ("qwen36-35b-a3b-nvfp4-mtp-dgx-spark", "1355db6a052410cfd62085d94b58866fd0f2c3c5"),
         ("qwen36-35b-a3b-q4-k-m-mtp-m5-pro", "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d"),
+        ("qwen36-35b-a3b-q4-k-m-mtp-panther-lake", "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d"),
         ("qwen36-35b-a3b-q4-k-m-mtp-rtx5090", "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d"),
         ("qwen36-35b-a3b-q4-k-m-mtp-strix-halo", "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d"),
         ("qwen38-27b-q4-k-m", "f1bfb127c64f7072bdd2cad55f258b9c8b2910fe"),
@@ -163,9 +165,11 @@ def test_managed_candidate_can_limit_hardware_and_framework_compatibility() -> N
         ("nemotron35-lightning-30b-a3b-q4-k-m-dflash-rtx5090", "nemotron35-lightning-30b-a3b-q4-k-m-dflash-strix-halo"),
         ("qwen35-9b-q4-k-m-mtp-rtx5090", "qwen35-9b-q4-k-m-mtp-strix-halo"),
         ("qwen35-9b-q4-k-m-mtp-rtx5090", "qwen35-9b-q4-k-m-mtp-m5-pro"),
+        ("qwen35-9b-q4-k-m-mtp-rtx5090", "qwen35-9b-q4-k-m-mtp-panther-lake"),
         ("qwen36-27b-q4-k-m-mtp-rtx5090", "qwen36-27b-q4-k-m-mtp-strix-halo"),
         ("qwen36-35b-a3b-q4-k-m-mtp-rtx5090", "qwen36-35b-a3b-q4-k-m-mtp-strix-halo"),
         ("qwen36-35b-a3b-q4-k-m-mtp-rtx5090", "qwen36-35b-a3b-q4-k-m-mtp-m5-pro"),
+        ("qwen36-35b-a3b-q4-k-m-mtp-rtx5090", "qwen36-35b-a3b-q4-k-m-mtp-panther-lake"),
         ("qwen38-27b-q4-k-m-mtp", "qwen38-27b-q4-k-m-mtp-strix-halo"),
         ("qwen38-27b-q4-k-m-mtp", "qwen38-27b-q4-k-m-mtp-m5-pro"),
     ),
@@ -219,10 +223,11 @@ def test_managed_frameworks_must_be_a_unique_canonical_subset(case: str) -> None
         ("model-alias", f"{GEMMA_RECIPE.as_posix()}: deployment.model_alias: Extra inputs are not permitted"),
         ("stray-file", "recipes must be .yaml files"),
         ("flat-recipe", "may only hold folders"),
-        ("device-order", "canonical subset of nvidia-cuda, amd-rocm, and apple-silicon"),
+        ("device-order", "canonical subset of nvidia-cuda, amd-rocm, apple-silicon, and intel-xpu"),
         (
             "unknown-device",
-            f"{GEMMA_RECIPE.as_posix()}: devices.0: Input should be 'nvidia-cuda', 'amd-rocm' or 'apple-silicon'",
+            f"{GEMMA_RECIPE.as_posix()}: devices.0: "
+            "Input should be 'nvidia-cuda', 'amd-rocm', 'apple-silicon' or 'intel-xpu'",
         ),
         ("reduced-context", "context_tokens must be 65536"),
         ("multiline-model-name", "model_name must be short printable text"),
@@ -230,6 +235,7 @@ def test_managed_frameworks_must_be_a_unique_canonical_subset(case: str) -> None
         ("hardware-field", f"{GEMMA_RECIPE.as_posix()}: hardware: Extra inputs are not permitted"),
         ("same-shown-name", "would show the same name; give one a variant"),
         ("llama-backend-device", "backend must match the recipe's devices"),
+        ("llama-sycl-backend-device", "backend must match the recipe's devices"),
         (
             "llama-threads-zero",
             f"{METAL_RECIPE.as_posix()}: deployment.llama_cpp.threads: Input should be greater than 0",
@@ -304,6 +310,8 @@ def test_rejects_malformed_or_promoted_recipes(tmp_path: Path, case: str, messag
         assert isinstance(launch, dict)
         if case == "llama-backend-device":
             launch["backend"] = "rocm"
+        elif case == "llama-sycl-backend-device":
+            launch["backend"] = "sycl"
         elif case == "llama-threads-zero":
             launch["threads"] = 0
         elif case == "llama-lazy-read-without-lazy-mode":

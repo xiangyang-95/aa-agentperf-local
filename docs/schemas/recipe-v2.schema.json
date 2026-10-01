@@ -28,7 +28,8 @@
       "enum": [
         "nvidia-cuda",
         "amd-rocm",
-        "apple-silicon"
+        "apple-silicon",
+        "intel-xpu"
       ]
     },
     "artifact": {
@@ -119,7 +120,8 @@
             null,
             "rocm",
             "vulkan",
-            "metal"
+            "metal",
+            "sycl"
           ]
         },
         "load_mode": {

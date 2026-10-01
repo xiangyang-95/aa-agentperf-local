@@ -115,6 +115,8 @@ def platform_device_id(platform: AcceleratorPlatform) -> DeviceId:
         return "nvidia-cuda"
     if platform == "amd-rocm":
         return "amd-rocm"
+    if platform == "intel-xpu":
+        return "intel-xpu"
     return "apple-silicon"
 
 
@@ -141,7 +143,7 @@ def installation_hint(framework: DeploymentFramework) -> str:
 
 def _support_note(framework: DeploymentFramework, platform: AcceleratorPlatform) -> str:
     if framework == "llama-cpp":
-        return "Native GGUF path using the framework's CUDA, HIP, or Metal backend."
+        return "Native GGUF path using the framework's CUDA, HIP, Metal, or SYCL backend."
     if framework == "splash":
         return "Packed four-bit path with DFlash 2 speculation on Splash's Metal engine; Apple Silicon only."
     if platform == "nvidia-cuda":

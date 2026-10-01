@@ -257,6 +257,8 @@ def _device_pinning_environment(platform: AcceleratorPlatform, device_index: int
         return (("CUDA_DEVICE_ORDER", "PCI_BUS_ID"), ("CUDA_VISIBLE_DEVICES", str(device_index)))
     if platform == "amd-rocm":
         return (("ROCR_VISIBLE_DEVICES", str(device_index)), ("HIP_VISIBLE_DEVICES", str(device_index)))
+    if platform == "intel-xpu":
+        return (("ONEAPI_DEVICE_SELECTOR", f"level_zero:{device_index}"),)
     return ()
 
 
@@ -654,6 +656,8 @@ def _accelerator_backend(platform: AcceleratorPlatform, launch: LlamaCppLaunch |
         return "cuda"
     if platform == "apple-metal":
         return "metal"
+    if platform == "intel-xpu":
+        return "sycl"
     return "vulkan" if launch is not None and launch.backend == "vulkan" else "rocm"
 
 
@@ -963,6 +967,10 @@ def verify_gpu_startup(deployment: ManagedDeployment) -> None:
                 "failed to initialize hip",
             )
             platform_markers = ("rocm", "hipblas", "rocblas", "hip platform", "rocmplatform")
+    elif deployment.plan.accelerator_platform == "intel-xpu":
+        failure_markers = ("no sycl device available", "sycl: failed to initialize")
+        # Not "ggml_sycl_init": a normal build prints it only in the init-failure line.
+        platform_markers = ("using device sycl", "sycl0 model buffer")
     else:
         failure_markers = ("metal unavailable", "metal is not available", "failed to initialize metal")
         platform_markers = (

@@ -47,6 +47,7 @@ PLATFORM_DISPLAY_NAMES: dict[AcceleratorPlatform, str] = {
     "nvidia-cuda": "CUDA",
     "amd-rocm": "ROCm",
     "apple-metal": "Metal",
+    "intel-xpu": "Intel XPU",
 }
 # Labels for the hardware folders the catalog ships; any other folder shows its own name.
 HARDWARE_TARGET_NAMES: dict[str, str] = {
@@ -54,6 +55,7 @@ HARDWARE_TARGET_NAMES: dict[str, str] = {
     "m5-pro": "M5 Pro",
     "rtx-5090": "RTX 5090",
     "strix-halo": "Strix Halo",
+    "panther-lake": "Panther Lake",
     "nvidia-cuda": "NVIDIA GPU",
     "any": "Any GPU",
 }
@@ -61,13 +63,20 @@ DEVICE_FAMILY_NAMES: dict[DeviceId, str] = {
     "nvidia-cuda": "NVIDIA",
     "amd-rocm": "AMD",
     "apple-silicon": "Apple",
+    "intel-xpu": "Intel",
 }
 DEVICE_PLATFORM_NAMES: dict[DeviceId, str] = {
     "nvidia-cuda": "NVIDIA (CUDA)",
     "amd-rocm": "AMD (ROCm)",
     "apple-silicon": "Apple silicon",
+    "intel-xpu": "Intel (SYCL)",
 }
-LLAMA_CPP_BACKEND_NAMES: dict[LlamaCppBackend, str] = {"rocm": "ROCm", "vulkan": "Vulkan", "metal": "Metal"}
+LLAMA_CPP_BACKEND_NAMES: dict[LlamaCppBackend, str] = {
+    "rocm": "ROCm",
+    "vulkan": "Vulkan",
+    "metal": "Metal",
+    "sycl": "SYCL",
+}
 STANDING_HEADLINES: dict[RecipeStanding, str] = {
     RecipeStanding.READY: "Runs on this computer",
     RecipeStanding.NEEDS_SETUP: "Needs setup on this computer",
